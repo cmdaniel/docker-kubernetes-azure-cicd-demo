@@ -1,5 +1,4 @@
-# docker-kubernetes-azure-cicd-demo
-
+# Demonstration of a Docker container deployed to Azure Kubernetes management system
 
 ## iis folder:
 This is a pilot project to demonstrate a Docker container with a dotnet 4.7 test application and a CI/CD pipeline to deploy on Azure AKS (Managed Kubernetes service)
