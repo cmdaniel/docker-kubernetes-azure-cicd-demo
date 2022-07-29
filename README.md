@@ -8,5 +8,5 @@ Then it will copy the project files to the new image and build the container.
 
 Currently, there is no dotnet application, just html files to illustrate.
 
-## root folder
+## powershell folder:
 In this same project, there is another Docker file to copy a powershell script to an image and build a container that will execute this powershell command on initialization. The goals is to demonstrate a container that can run powershell commands when it is started.
