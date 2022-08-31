@@ -1,61 +1,80 @@
-# Demonstration of a Docker container deployed to Azure Kubernetes management system
+# AKS Cluster Creation action
 
-## iis folder:
-This is a pilot project to demonstrate a Docker container with a dotnet 4.7 test application and a CI/CD pipeline to deploy on Azure AKS (Managed Kubernetes service)
-The Docker file will basically get a Docker Image from mcr.microsoft.com/windows/servercore/iis and configurate the IIS to host a dotnet framework 4.7 application.
-Then it will copy the project files to the new image and build the container.
+This action creates an Azure Kubernetes Service Cluster using Terraform
 
-Currently, there is no dotnet application, just html files to illustrate.
+## Setup
 
-## powershell folder:
-In this same project, there is another Docker file to copy a powershell script to an image and build a container that will execute this powershell command on initialization. The goals is to demonstrate a container that can run powershell commands when it is started.
+Making use of this action requires an Azure Service Principal and a resource group containing a storage account to store the terraform state.
 
+These can be created using the setup.sh script in this repo
 
-## Docker commands
+```
+./setup.sh -c <<cluster name> -g <<resource group name>> -s <<subscription id>> -r <<region>>
+```
 
-### To Build a Docker Image from your DockerFile
-docker build -t [Your DockerHub username]/[project name]:[version] .
+The output from this command should look like this and matches the variables that need to be passed to the action
 
-docker build -t danielmelolumen/docker-aks-emea-webapp:1.0 .
-
-### List existent images
-docker images
-
-### Create and run a new container from your built image
-–d to be detached from the command prompt (otherwise it will block and be attached to it), 
--p to map the local_machine_port:container_port
-
-ATTENCION: the container_port must match the IIS (or other webserver) port for your application specified on your Dockerfile.
-
-When you use your browser locally to access the application, use the local_machine_port
-To setup IIS bindings, firewalls, etc, on the container, use the container_port
--name the name you want to give your new container
-Last param: the tag name you gave to the image
-
-docker run -d -p 8081:8081 --name  dockerAksEmeaWebapp  danielmelolumen/docker-aks-emea-webapp:1.0
+```
+CLUSTER_NAME: testCluster
+RESOURCE_GROUP_NAME: newGroup
+STORAGE_ACCOUNT_NAME: newgroup27941
+STORAGE_CONTAINER_NAME: testclustertstate
+STORAGE_ACCESS_KEY: ******
+ARM_CLIENT_ID: ******
+ARM_CLIENT_SECRET: ******
+ARM_SUBSCRIPTION_ID: ******
+ARM_TENANT_ID: ******
+```
 
 
-After running, if your container has a webapp, for example, you can try to access on the local machine port:
-http://localhost:8081/
+## Inputs
 
-### NOTES: 
-#### 1) if you are running the GlobalProtect VPN you might not be able to access the container.
-#### 2) If you deploy this container to the cloud, make sure that the selected port is open on the cloud environment firewall, and the container is exposed publicly, and has a public ip.
+* `CLUSTER_NAME` ***required***
+* `RESOURCE_GROUP_NAME` ***required***
+* `STORAGE_ACCOUNT_NAME` ***required***
+* `STORAGE_CONTAINER_NAME` ***required***
+* `STORAGE_ACCESS_KEY` ***required***
+* `ARM_CLIENT_ID` ***required***
+* `ARM_CLIENT_SECRET` ***required***
+* `ARM_SUBSCRIPTION_ID` ***required***
+* `ARM_TENANT_ID` ***required***
+* `CLUSTER_SIZE` ***optional*** - dev (default) or test
+* `ACTION_TYPE` ***optional*** - create (default) or delete 
+* `CREATE_ACR` ***optional*** - true or false (default)
 
 
-## Other useful commands
+## Example usage
+```
+uses: actions/aks_create_action@v1
+with:
+  CLUSTER_NAME: testCluster
+  RESOURCE_GROUP_NAME: newGroup
+  STORAGE_ACCOUNT_NAME: newgroup27941
+  STORAGE_CONTAINER_NAME: testclustertstate
+  STORAGE_ACCESS_KEY: ******
+  ARM_CLIENT_ID: ******
+  ARM_CLIENT_SECRET: ******
+  ARM_SUBSCRIPTION_ID: ******
+  ARM_TENANT_ID: ******
+  ACTION_TYPE: create # optional
+  CLUSTER_SIZE: dev # optional
+  CREATE_ACR: false # optional
+```
 
-### List containers:
-docker ps 
+Full deployment workflow showing this action in use - https://github.com/gambtho/go_echo
 
-### List container and images:
-docker ps –all
+## References
 
-### Run the container on interactive mode (with access to powershell, cmd or bash, for example):
-docker run –it danielmelolumen/dotnetApp:1.0
+* https://docs.microsoft.com/en-us/azure/aks/kubernetes-action
+* https://wahlnetwork.com/2020/05/12/continuous-integration-with-github-actions-and-terraform/
+* https://github.com/Azure/actions-workflow-samples/tree/master/Kubernetes
 
-### Inspect the container logs:
-docker inspect [container_id]
+## Contributing
+This project welcomes contributions and suggestions. Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
 
-Find the container id using “docker ps”.  
-On the inspect command, you can use just the first characters that distinguishes your container.
+When you submit a pull request, a CLA bot will automatically determine whether you need to provide a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions provided by the bot. You will only need to do this once across all repos using our CLA.
+
+This project has adopted the Microsoft Open Source Code of Conduct. For more information see the Code of Conduct FAQ or contact opencode@microsoft.com with any additional questions or comments.
+
+## Trademarks
+This project may contain trademarks or logos for projects, products, or services. Authorized use of Microsoft trademarks or logos is subject to and must follow Microsoft's Trademark & Brand Guidelines. Use of Microsoft trademarks or logos in modified versions of this project must not cause confusion or imply Microsoft sponsorship. Any use of third-party trademarks or logos are subject to those third-party's policies.
